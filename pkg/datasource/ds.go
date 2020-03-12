@@ -18,19 +18,19 @@ type Ds struct {
 	Db *gorm.DB
 }
 
-func gormDb() *gorm.DB {
-	db, err := gorm.Open("mysql", "root:12345678@(localhost:3306)/stu?charset=utf8mb4&parseTime=True&loc=Local")
+func gormDb(opt *Opt) *gorm.DB {
+	db, err := gorm.Open("mysql", opt.MySqlConn)
 	utee.Chk(err)
 	db.DB().SetMaxIdleConns(500)
 	db.DB().SetMaxOpenConns(1500)
 	db.SingularTable(true)
-	db.LogMode(true)
+	db.LogMode(opt.Debug)
 	return db
 }
 
-func CreateDs() *Ds {
+func CreateDs(opt *Opt) *Ds {
 	ds := &Ds{
-		Db: gormDb(),
+		Db: gormDb(opt),
 	}
 	fmt.Println("init gorm db")
 	initAndMigration(ds)

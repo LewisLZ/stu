@@ -1,13 +1,15 @@
 package pkg
 
 import (
+	"liuyu/stu/pkg/ut"
 	"liuyu/stu/pkg/web"
 )
 
 type App struct {
-	Web *web.Web
+	Web    *web.Web
+	WebOpt *ut.WebOpt
 }
 
 func (p *App) Run() {
-	p.Web.CreateWebServer(":3000", "./public")
+	p.Web.CreateWebServer(p.WebOpt)
 }

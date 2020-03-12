@@ -33,7 +33,7 @@ const (
 	SESSION_NAME = "web-session"
 )
 
-func (p *Web) CreateWebServer(addr, war string) {
+func (p *Web) CreateWebServer(webOpt *ut.WebOpt) {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 	router.Use(MidHSTS())
@@ -51,7 +51,7 @@ func (p *Web) CreateWebServer(addr, war string) {
 		c.Next()
 	})
 
-	router.Use(gin.Recovery(), static.Serve("/", static.LocalFile(war, true)))
+	router.Use(gin.Recovery(), static.Serve("/", static.LocalFile(webOpt.War, true)))
 
 	router.GET("/bv", func(c *gin.Context) { c.String(200, fmt.Sprintf("binary version: %v\n", Version)) })
 
@@ -61,6 +61,6 @@ func (p *Web) CreateWebServer(addr, war string) {
 	}
 
 	http.Handle("/", router)
-	fmt.Printf("web serve on %s", addr)
-	panic(http.ListenAndServe(addr, nil))
+	fmt.Printf("web serve on %s", webOpt.Addr)
+	panic(http.ListenAndServe(webOpt.Addr, nil))
 }

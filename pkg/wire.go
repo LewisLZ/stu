@@ -18,6 +18,7 @@ func New() (*App, error) {
 var appSet = wire.NewSet(
 	wire.Struct(new(App), "*"),
 	defaultDsOpt,
+	defaultWebOpt,
 	datasource.CreateDs,
 	webSet,
 	helSet,

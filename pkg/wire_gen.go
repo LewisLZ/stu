@@ -16,7 +16,8 @@ import (
 // Injectors from wire.go:
 
 func New() (*App, error) {
-	ds := datasource.CreateDs()
+	opt := defaultDsOpt()
+	ds := datasource.CreateDs(opt)
 	stu := &hdl.Stu{}
 	teacher := &service.Teacher{
 		Ds: ds,
@@ -62,15 +63,18 @@ func New() (*App, error) {
 		Hdl: hdlHdl,
 		Ds:  ds,
 	}
+	webOpt := defaultWebOpt()
 	app := &App{
-		Web: webWeb,
+		Web:    webWeb,
+		WebOpt: webOpt,
 	}
 	return app, nil
 }
 
 // wire.go:
 
-var appSet = wire.NewSet(wire.Struct(new(App), "*"), defaultDsOpt, datasource.CreateDs, webSet,
+var appSet = wire.NewSet(wire.Struct(new(App), "*"), defaultDsOpt,
+	defaultWebOpt, datasource.CreateDs, webSet,
 	helSet,
 	srvSet,
 )
