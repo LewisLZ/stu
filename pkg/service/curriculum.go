@@ -34,7 +34,7 @@ func (p *Curriculum) List(req *form.ListCurriculum) ([]*model.Curriculum, int, e
 		if err := p.Ds.Db.Table(model.C_Teacher+" t").
 			Joins("LEFT JOIN teacher_curriculum tc ON tc.teacher_id=t.id").
 			Select("t.id, t.name, t.mobile").
-			Where("tc.curriculum_id=?", v.Id).Scan(&teachers).Error; err != nil {
+			Where("tc.curriculum_id=?", v.Id).Order("t.id desc").Scan(&teachers).Error; err != nil {
 			return nil, 0, err
 		}
 		v.Teacher = teachers
@@ -45,7 +45,7 @@ func (p *Curriculum) List(req *form.ListCurriculum) ([]*model.Curriculum, int, e
 
 func (p *Curriculum) ListNameByIds(ids []int) ([]string, error) {
 	var names []string
-	if err := p.Ds.Db.Model(&model.Curriculum{}).Select("name").Where("id in (?)", ids).Pluck("name", &names).Error; err != nil {
+	if err := p.Ds.Db.Model(&model.Curriculum{}).Select("name").Where("id in (?)", ids).Order("id desc").Pluck("name", &names).Error; err != nil {
 		return nil, err
 	}
 	return names, nil

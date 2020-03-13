@@ -9,7 +9,8 @@ import (
 func initAndMigration(ds *Ds) {
 	db := ds.Db
 	err := db.AutoMigrate(
-		model.Stu{},
+		model.Student{},
+		model.StudentCode{},
 		model.User{},
 		model.Teacher{},
 		model.Curriculum{},

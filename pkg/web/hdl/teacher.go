@@ -19,8 +19,8 @@ type Teacher struct {
 func (p *Teacher) Mount(g *gin.RouterGroup) {
 	g.GET("/", p.Get)
 	g.GET("/list", p.List)
-	g.POST("/create", p.Create)
-	g.POST("/update", p.Update)
+	g.POST("/create", p.Save(false))
+	g.POST("/update", p.Save(true))
 	g.DELETE("/delete", p.Delete)
 }
 
@@ -62,75 +62,44 @@ func (p *Teacher) List(c *gin.Context) {
 	c.JSON(200, j)
 }
 
-func (p *Teacher) Create(c *gin.Context) {
-	var req form.SaveTeacher
-	if err := c.Bind(&req); err != nil {
-		c.String(400, "参数错误")
-		return
-	}
-	val := func(teacher *form.SaveTeacher) (bool, string) {
-		if teacher.Name == "" {
-			return false, "姓名不能为空"
+func (p *Teacher) Save(update bool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req form.SaveTeacher
+		if err := c.Bind(&req); err != nil {
+			c.String(400, "参数错误")
+			return
 		}
-		if teacher.Mobile == "" {
-			return false, "电话不能为空"
+		val := func(teacher *form.SaveTeacher) (bool, string) {
+			if update && teacher.Id == 0 {
+				return false, "Id不能为空"
+			}
+			if teacher.Name == "" {
+				return false, "姓名不能为空"
+			}
+			if teacher.Mobile == "" {
+				return false, "电话不能为空"
+			}
+			if teacher.Sex != 1 && teacher.Sex != 2 {
+				return false, "性别错误"
+			}
+			if len(teacher.CurriculumIds) == 0 {
+				return false, "课程不能为空"
+			}
+			if len(teacher.ClassIds) == 0 {
+				return false, "班级不能为空"
+			}
+			return true, ""
 		}
-		if teacher.Sex != 1 && teacher.Sex != 2 {
-			return false, "性别错误"
+		ok, s := val(&req)
+		if !ok {
+			c.String(400, s)
+			return
 		}
-		if len(teacher.CurriculumIds) == 0 {
-			return false, "课程不能为空"
-		}
-		if len(teacher.ClassIds) == 0 {
-			return false, "班级不能为空"
-		}
-		return true, ""
-	}
-	ok, s := val(&req)
-	if !ok {
-		c.String(400, s)
-		return
-	}
-	utee.Chk(p.TeacherService.Save(&req))
+		utee.Chk(p.TeacherService.Save(&req))
 
-	c.String(200, "OK")
-}
+		c.String(200, "OK")
 
-func (p *Teacher) Update(c *gin.Context) {
-	var req form.SaveTeacher
-	if err := c.Bind(&req); err != nil {
-		c.String(400, "参数错误")
-		return
 	}
-	val := func(teacher *form.SaveTeacher) (bool, string) {
-		if teacher.Id == 0 {
-			return false, "Id不能为空"
-		}
-		if teacher.Name == "" {
-			return false, "姓名不能为空"
-		}
-		if teacher.Mobile == "" {
-			return false, "电话不能为空"
-		}
-		if teacher.Sex != 1 && teacher.Sex != 2 {
-			return false, "性别错误"
-		}
-		if len(teacher.CurriculumIds) == 0 {
-			return false, "课程不能为空"
-		}
-		if len(teacher.ClassIds) == 0 {
-			return false, "班级不能为空"
-		}
-		return true, ""
-	}
-	ok, s := val(&req)
-	if !ok {
-		c.String(400, s)
-		return
-	}
-	utee.Chk(p.TeacherService.Save(&req))
-
-	c.String(200, "OK")
 }
 
 func (p *Teacher) Delete(c *gin.Context) {

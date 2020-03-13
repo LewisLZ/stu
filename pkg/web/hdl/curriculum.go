@@ -19,8 +19,8 @@ func (p *Curriculum) Mount(g *gin.RouterGroup) {
 	g.GET("/", p.Get)
 	g.GET("/list", p.List)
 	g.GET("/listNameByIds", p.ListNameByIds)
-	g.POST("/create", p.Create)
-	g.POST("/update", p.Update)
+	g.POST("/create", p.Save(false))
+	g.POST("/update", p.Save(true))
 	g.DELETE("/delete", p.Delete)
 }
 
@@ -80,49 +80,30 @@ func (p *Curriculum) ListNameByIds(c *gin.Context) {
 	})
 }
 
-func (p *Curriculum) Create(c *gin.Context) {
-	var req form.SaveCurriculum
-	if err := c.Bind(&req); err != nil {
-		c.String(400, "参数错误")
-		return
-	}
-	val := func(req *form.SaveCurriculum) (bool, string) {
-		if req.Name == "" {
-			return false, "课程名称不能为空"
+func (p *Curriculum) Save(update bool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req form.SaveCurriculum
+		if err := c.Bind(&req); err != nil {
+			c.String(400, "参数错误")
+			return
 		}
-		return true, ""
-	}
-	ok, str := val(&req)
-	if !ok {
-		c.String(400, str)
-		return
-	}
-	utee.Chk(p.CurriculumService.Save(&req))
-	c.String(200, "OK")
-}
-
-func (p *Curriculum) Update(c *gin.Context) {
-	var req form.SaveCurriculum
-	if err := c.Bind(&req); err != nil {
-		c.String(400, "参数错误")
-		return
-	}
-	val := func(req *form.SaveCurriculum) (bool, string) {
-		if req.Id == 0 {
-			return false, "Id不能为空"
+		val := func(req *form.SaveCurriculum) (bool, string) {
+			if update && req.Id == 0 {
+				return false, "Id不能为空"
+			}
+			if req.Name == "" {
+				return false, "课程名称不能为空"
+			}
+			return true, ""
 		}
-		if req.Name == "" {
-			return false, "课程名称不能为空"
+		ok, str := val(&req)
+		if !ok {
+			c.String(400, str)
+			return
 		}
-		return true, ""
+		utee.Chk(p.CurriculumService.Save(&req))
+		c.String(200, "OK")
 	}
-	ok, str := val(&req)
-	if !ok {
-		c.String(400, str)
-		return
-	}
-	utee.Chk(p.CurriculumService.Save(&req))
-	c.String(200, "OK")
 }
 
 func (p *Curriculum) Delete(c *gin.Context) {

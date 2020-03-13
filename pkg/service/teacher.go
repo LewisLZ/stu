@@ -60,7 +60,7 @@ func (p *Teacher) List(in *form.ListTeacher) ([]*model.Teacher, int, error) {
 	if err := db.Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
-	if err := db.Limit(limit).Offset(offset).Scan(&teachers).Error; err != nil {
+	if err := db.Limit(limit).Offset(offset).Order("id desc").Scan(&teachers).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -74,10 +74,9 @@ func (p *Teacher) List(in *form.ListTeacher) ([]*model.Teacher, int, error) {
 
 func (p *Teacher) MakeClassAndCurriculumIds(t *model.Teacher) error {
 	class := []*model.Class{}
-	if err := p.Ds.Db.Table(model.C_Class+" c").
-		Select("c.id, c.name").
-		Joins("LEFT JOIN teacher_class tc ON c.id=tc.class_id").
-		Where("tc.teacher_id=?", t.Id).
+	if err := p.Ds.Db.Table("class c1, class c2, teacher_class tc").
+		Select("c1.id, concat(c2.name, '-', c1.name) name").
+		Where("tc.teacher_id=? AND c1.parent_id=c2.id AND c1.id=tc.class_id", t.Id).
 		Scan(&class).Error; err != nil {
 		return err
 	}
@@ -100,15 +99,15 @@ func (p *Teacher) MakeClassAndCurriculumIds(t *model.Teacher) error {
 func (p *Teacher) Save(in *form.SaveTeacher) error {
 	teacher := model.Teacher{}
 	tick := utee.Tick()
-	if err := copier.Copy(&teacher, in); err != nil {
-		return err
-	}
 	if in.Id > 0 {
 		if err := p.Ds.Db.First(&teacher, in.Id).Error; err != nil {
 			return err
 		}
 	} else {
 		teacher.Ct = tick
+	}
+	if err := copier.Copy(&teacher, in); err != nil {
+		return err
 	}
 	teacher.Mt = tick
 

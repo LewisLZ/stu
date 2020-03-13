@@ -18,8 +18,8 @@ type Class struct {
 func (p *Class) Mount(g *gin.RouterGroup) {
 	g.GET("/list", p.List)
 	g.GET("/listNameByIds", p.ListNameByIds)
-	g.POST("/create", p.Create)
-	g.POST("/update", p.Update)
+	g.POST("/create", p.Save(false))
+	g.POST("/update", p.Save(true))
 	g.DELETE("/delete", p.Delete)
 }
 
@@ -56,55 +56,33 @@ func (p *Class) ListNameByIds(c *gin.Context) {
 	})
 }
 
-func (p *Class) Create(c *gin.Context) {
-	var req form.SaveClass
-	if err := c.Bind(&req); err != nil {
-		c.String(400, "参数错误")
-		return
-	}
-	val := func(req *form.SaveClass) (bool, string) {
-		if req.Name == "" {
-			return false, "名称不能为空"
+func (p *Class) Save(update bool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req form.SaveClass
+		if err := c.Bind(&req); err != nil {
+			c.String(400, "参数错误")
+			return
 		}
-		return true, ""
-	}
-
-	ok, str := val(&req)
-	if !ok {
-		c.String(400, str)
-		return
-	}
-
-	utee.Chk(p.ClassService.Save(&req))
-
-	c.String(200, "OK")
-}
-
-func (p *Class) Update(c *gin.Context) {
-	var req form.SaveClass
-	if err := c.Bind(&req); err != nil {
-		c.String(400, "参数错误")
-		return
-	}
-	val := func(req *form.SaveClass) (bool, string) {
-		if req.Id == 0 {
-			return false, "Id不能为空"
+		val := func(req *form.SaveClass) (bool, string) {
+			if update && req.Id == 0 {
+				return false, "Id不能为空"
+			}
+			if req.Name == "" {
+				return false, "名称不能为空"
+			}
+			return true, ""
 		}
-		if req.Name == "" {
-			return false, "名称不能为空"
+
+		ok, str := val(&req)
+		if !ok {
+			c.String(400, str)
+			return
 		}
-		return true, ""
+
+		utee.Chk(p.ClassService.Save(&req))
+
+		c.String(200, "OK")
 	}
-
-	ok, str := val(&req)
-	if !ok {
-		c.String(400, str)
-		return
-	}
-
-	utee.Chk(p.ClassService.Save(&req))
-
-	c.String(200, "OK")
 }
 
 func (p *Class) Delete(c *gin.Context) {

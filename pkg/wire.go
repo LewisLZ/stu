@@ -44,4 +44,5 @@ var srvSet = wire.NewSet(
 	wire.Struct(new(service.Teacher), "*"),
 	wire.Struct(new(service.Curriculum), "*"),
 	wire.Struct(new(service.Class), "*"),
+	wire.Struct(new(service.Student), "*"),
 )

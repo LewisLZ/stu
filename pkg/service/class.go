@@ -36,7 +36,7 @@ func (p *Class) List(parentId int) ([]*model.Class, error) {
 		if err := p.Ds.Db.Table(model.C_Teacher+" t").
 			Joins("LEFT JOIN teacher_class tc ON tc.teacher_id=t.id").
 			Select("t.id, t.name, t.mobile").
-			Where("tc.class_id=?", class.Id).Scan(&teachers).Error; err != nil {
+			Where("tc.class_id=?", class.Id).Order("t.id desc").Scan(&teachers).Error; err != nil {
 			return nil, err
 		}
 		class.Teacher = teachers
@@ -47,7 +47,11 @@ func (p *Class) List(parentId int) ([]*model.Class, error) {
 
 func (p *Class) ListNameByIds(ids []int) ([]string, error) {
 	var names []string
-	if err := p.Ds.Db.Model(&model.Class{}).Select("name").Where("id in (?)", ids).Pluck("name", &names).Error; err != nil {
+
+	if err := p.Ds.Db.Raw(`select concat(c2.name, '-', c1.name) names
+			from class c1, class c2 
+			where c1.id in (?) and c1.parent_id=c2.id`, ids).Order("c1.id desc").Pluck("names", &names).
+		Error; err != nil {
 		return nil, err
 	}
 	return names, nil
