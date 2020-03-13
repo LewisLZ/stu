@@ -38,10 +38,6 @@ func (p *ClassCurriculum) YearList(c *gin.Context) {
 		return
 	}
 	ccy, err := p.ClassCurriculumService.YearList(&req)
-	if ut.IsValidateError(err) {
-		c.String(400, err.Error())
-		return
-	}
 	utee.Chk(err)
 
 	c.JSON(200, utee.J{
@@ -76,7 +72,12 @@ func (p *ClassCurriculum) YearSave(update bool) gin.HandlerFunc {
 			c.String(400, str)
 			return
 		}
-		utee.Chk(p.ClassCurriculumService.YearSave(&req))
+		err := p.ClassCurriculumService.YearSave(&req)
+		if ut.IsValidateError(err) {
+			c.String(400, err.Error())
+			return
+		}
+		utee.Chk(err)
 		c.String(200, "OK")
 	}
 }

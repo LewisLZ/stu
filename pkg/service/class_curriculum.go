@@ -54,7 +54,8 @@ func (p *ClassCurriculum) YearSave(req *form.SaveClassCurriculumYear) error {
 		Year string
 		Pos  model.Pos
 	}
-	if err := p.Ds.Db.Table("class c, school_year s").
+	if err := p.Ds.Db.Table("class c").
+		Joins("LEFT JOIN school_year s ON c.school_year_id=s.id").
 		Select("s.year, s.pos").
 		Where("c.id=?", req.ClassId).
 		Scan(&school).Error; err != nil {
@@ -90,7 +91,11 @@ func (p *ClassCurriculum) YearSave(req *form.SaveClassCurriculumYear) error {
 	}
 	cc.Mt = pick
 
-	if err := p.Ds.Db.Save(&cc).Error; err != nil {
+	err = p.Ds.Db.Save(&cc).Error
+	if datasource.Duplicate(err) {
+		return ut.NewValidateError("年份+月份不能重复")
+	}
+	if err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
