@@ -19,6 +19,7 @@ func initAndMigration(ds *Ds) {
 		model.TeacherClass{},
 		model.TeacherCurriculum{},
 		model.ClassCurriculumYear{},
+		model.ClassCurriculum{},
 	).Error
 	utee.Chk(err)
 }

@@ -24,7 +24,36 @@ func (p *ClassCurriculum) Mount(g *gin.RouterGroup) {
 		year.POST("/update", p.YearSave(false))
 		year.DELETE("/delete", p.YearDelete)
 	}
+	g.POST("/create", p.Create)
+}
 
+func (p *ClassCurriculum) Create(c *gin.Context) {
+	var req form.SaveClassCurriculum
+	if err := c.Bind(&req); err != nil {
+		c.String(400, "参数错误")
+		return
+	}
+	val := func(req *form.SaveClassCurriculum) (bool, string) {
+		if req.CCYearId == 0 {
+			return false, "课程年份不能为空"
+		}
+		if req.CurriculumIds == nil {
+			return false, "课程不能为空"
+		}
+		return true, ""
+	}
+	ok, str := val(&req)
+	if !ok {
+		c.String(400, str)
+		return
+	}
+	err := p.ClassCurriculumService.Create(&req)
+	if ut.IsValidateError(err) {
+		c.String(400, err.Error())
+		return
+	}
+	utee.Chk(err)
+	c.String(200, "OK")
 }
 
 func (p *ClassCurriculum) YearList(c *gin.Context) {

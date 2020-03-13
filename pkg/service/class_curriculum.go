@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/jinzhu/copier"
+	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"github.com/quexer/utee"
 
@@ -17,6 +18,31 @@ import (
 type ClassCurriculum struct {
 	Ds                 *datasource.Ds
 	ClassCurriculumDao *dao.ClassCurriculum
+}
+
+func (p *ClassCurriculum) Create(req *form.SaveClassCurriculum) error {
+
+	err := datasource.RunTransaction(p.Ds.Db, func(tx *gorm.DB) error {
+
+		if err := tx.Where("cc_year_id=?", req.CCYearId).Delete(&model.ClassCurriculum{}).Error; err != nil {
+			return err
+		}
+
+		tick := utee.Tick()
+		for _, id := range req.CurriculumIds {
+			cc := model.ClassCurriculum{}
+			cc.CCYearId = req.CCYearId
+			cc.CurriculumId = id
+			cc.Ct = tick
+			cc.Mt = tick
+			if err := tx.Create(&cc).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	return err
 }
 
 func (p *ClassCurriculum) YearList(req *form.ListClassCurriculumYear) ([]*model.ClassCurriculumYear, error) {

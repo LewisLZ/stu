@@ -79,7 +79,7 @@ func (p *Class) List(in *form.ListClass) ([]*model.Class, int, error) {
 			if err := p.Ds.Db.Table(model.C_Curriculum+" c").
 				Select("c.id, c.name").
 				Joins("LEFT JOIN teacher_curriculum tc ON c.id=tc.curriculum_id").
-				Where("tc.teacher_id=?", t.Id).
+				Where("tc.teacher_id=?", t.Id).Order("c.id").
 				Scan(&curriculum).Error; err != nil {
 				return nil, 0, errors.WithStack(err)
 			}
@@ -94,6 +94,7 @@ func (p *Class) List(in *form.ListClass) ([]*model.Class, int, error) {
 			return nil, 0, errors.WithStack(err)
 		}
 		class.Student = students
+
 	}
 
 	return clasies, count, nil
@@ -110,7 +111,7 @@ func (p *Class) ListNameByIds(ids []int) ([]string, error) {
 
 	if err := p.Ds.Db.Raw(`select c.name, s.year, s.pos
 			from class c, school_year s 
-			where c.id in (?) and c.school_year_id=s.id`, ids).Order("c.id desc").Scan(&res).
+			where c.id in (?) and c.school_year_id=s.id`, ids).Order("c.id").Scan(&res).
 		Error; err != nil {
 		return nil, err
 	}

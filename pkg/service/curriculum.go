@@ -46,7 +46,7 @@ func (p *Curriculum) List(req *form.ListCurriculum) ([]*model.Curriculum, int, e
 
 func (p *Curriculum) ListNameByIds(ids []int) ([]string, error) {
 	var names []string
-	if err := p.Ds.Db.Model(&model.Curriculum{}).Select("name").Where("id in (?)", ids).Order("id desc").Pluck("name", &names).Error; err != nil {
+	if err := p.Ds.Db.Model(&model.Curriculum{}).Select("name").Where("id in (?)", ids).Order("id").Pluck("name", &names).Error; err != nil {
 		return nil, err
 	}
 	return names, nil
