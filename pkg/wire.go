@@ -5,6 +5,7 @@ package pkg
 import (
 	"github.com/google/wire"
 
+	"liuyu/stu/pkg/dao"
 	"liuyu/stu/pkg/datasource"
 	"liuyu/stu/pkg/service"
 	"liuyu/stu/pkg/web"
@@ -23,6 +24,7 @@ var appSet = wire.NewSet(
 	webSet,
 	helSet,
 	srvSet,
+	daoSet,
 )
 
 var webSet = wire.NewSet(
@@ -38,6 +40,7 @@ var helSet = wire.NewSet(
 	wire.Struct(new(hdl.Mid), "*"),
 	wire.Struct(new(hdl.Curriculum), "*"),
 	wire.Struct(new(hdl.Class), "*"),
+	wire.Struct(new(hdl.SchoolYear), "*"),
 )
 
 var srvSet = wire.NewSet(
@@ -45,4 +48,10 @@ var srvSet = wire.NewSet(
 	wire.Struct(new(service.Curriculum), "*"),
 	wire.Struct(new(service.Class), "*"),
 	wire.Struct(new(service.Student), "*"),
+	wire.Struct(new(service.SchoolYear), "*"),
+)
+
+var daoSet = wire.NewSet(
+	wire.Struct(new(dao.Class), "*"),
+	wire.Struct(new(dao.Curriculum), "*"),
 )

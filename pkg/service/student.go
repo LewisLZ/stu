@@ -23,40 +23,42 @@ type Student struct {
 func (p *Student) Get(id int) (*model.Student, error) {
 	var stu model.Student
 
-	if err := p.Ds.Db.Table("student t, class c1, class c2").
-		Select("t.id, t.name, t.code, t.sex, t.class_id, t.mobile, t.birthday, t.intake_time, t.address, concat(c2.name, '-', c1.name) class_name").
-		Where("t.class_id=c1.id AND c1.parent_id=c2.id AND t.id=?", id).Scan(&stu).Error; err != nil {
+	if err := p.Ds.Db.Table("student t, class c, school_year s").
+		Select("t.id, t.name, t.code, t.sex, t.class_id, t.mobile, t.birthday, t.intake_time, t.address, c.name class_name, s.year, s.pos").
+		Where("t.class_id=c.id AND c.school_year_id=s.id AND t.id=?", id).Scan(&stu).Error; err != nil {
 		return nil, errors.WithStack(err)
 	}
+
+	stu.ClassName = ut.MakeClassName(stu.ClassName, stu.Year, stu.Pos)
 
 	return &stu, nil
 }
 
 func (p *Student) List(in *form.ListStudent) ([]*model.Student, int, error) {
-	db := p.Ds.Db.Table("student t, class c1, class c2").
-		Select("t.id, t.name, t.code, t.sex, t.mobile, t.birthday, t.intake_time, t.address, concat(c2.name, '-', c1.name) class_name").
-		Where("t.class_id=c1.id AND c1.parent_id=c2.id")
+	db := p.Ds.Db.Table("student t, class c, school_year s").
+		Select("t.id, t.name, t.code, t.sex, t.mobile, t.birthday, t.intake_time, t.address, c.name class_name, s.year, s.pos").
+		Where("t.class_id=c.id AND c.school_year_id=s.id")
 
 	if in.IntakeTime != "" {
-		db = db.Where("intake_time=?", in.IntakeTime)
+		db = db.Where("t.intake_time=?", in.IntakeTime)
 	}
 	if in.Code != "" {
-		db = db.Where("code like ?", "%"+in.Code+"%")
+		db = db.Where("t.code like ?", "%"+in.Code+"%")
 	}
 	if in.Sex > model.SexUnknown && in.Sex <= model.SexGirl {
-		db = db.Where("sex = ?", in.Sex)
+		db = db.Where("t.sex = ?", in.Sex)
 	}
 	if in.Name != "" {
-		db = db.Where("code name ?", "%"+in.Name+"%")
+		db = db.Where("t.name like ?", "%"+in.Name+"%")
 	}
 	if in.Birthday != "" {
-		db = db.Where("birthday=?", in.Birthday)
+		db = db.Where("t.birthday=?", in.Birthday)
 	}
 	if in.Address != "" {
-		db = db.Where("code address ?", "%"+in.Address+"%")
+		db = db.Where("t.address like ?", "%"+in.Address+"%")
 	}
 	if in.Mobile != "" {
-		db = db.Where("code mobile ?", "%"+in.Mobile+"%")
+		db = db.Where("t.mobile like ?", "%"+in.Mobile+"%")
 	}
 
 	var count int
@@ -65,10 +67,13 @@ func (p *Student) List(in *form.ListStudent) ([]*model.Student, int, error) {
 	}
 	_, limit, offset := ut.MakePager(in.Page, in.Limit, 10)
 	var stus []*model.Student
-	if err := db.Limit(limit).Offset(offset).Order("id desc").Scan(&stus).Error; err != nil {
+	if err := db.Limit(limit).Offset(offset).Order("t.id desc").Scan(&stus).Error; err != nil {
 		return nil, 0, errors.WithStack(err)
 	}
 
+	for _, stu := range stus {
+		stu.ClassName = ut.MakeClassName(stu.ClassName, stu.Year, stu.Pos)
+	}
 	return stus, count, nil
 }
 

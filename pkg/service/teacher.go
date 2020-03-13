@@ -5,6 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/quexer/utee"
 
+	"liuyu/stu/pkg/dao"
 	"liuyu/stu/pkg/datasource"
 	"liuyu/stu/pkg/model"
 	"liuyu/stu/pkg/ut"
@@ -12,7 +13,9 @@ import (
 )
 
 type Teacher struct {
-	Ds *datasource.Ds
+	Ds            *datasource.Ds
+	ClassDao      *dao.Class
+	CurriculumDao *dao.Curriculum
 }
 
 func (p *Teacher) Get(id int) (*model.Teacher, error) {
@@ -73,25 +76,16 @@ func (p *Teacher) List(in *form.ListTeacher) ([]*model.Teacher, int, error) {
 }
 
 func (p *Teacher) MakeClassAndCurriculumIds(t *model.Teacher) error {
-	class := []*model.Class{}
-	if err := p.Ds.Db.Table("class c1, class c2, teacher_class tc").
-		Select("c1.id, concat(c2.name, '-', c1.name) name").
-		Where("tc.teacher_id=? AND c1.parent_id=c2.id AND c1.id=tc.class_id", t.Id).
-		Scan(&class).Error; err != nil {
+	class, err := p.ClassDao.ListClassWithTeacherId(p.Ds.Db, t.Id)
+	if err != nil {
 		return err
 	}
-
 	t.Class = class
 
-	curriculum := []*model.Curriculum{}
-	if err := p.Ds.Db.Table(model.C_Curriculum+" c").
-		Select("c.id, c.name").
-		Joins("LEFT JOIN teacher_curriculum tc ON c.id=tc.curriculum_id").
-		Where("tc.teacher_id=?", t.Id).
-		Scan(&curriculum).Error; err != nil {
+	curriculum, err := p.CurriculumDao.ListCurriculumWithTeacherId(p.Ds.Db, t.Id)
+	if err != nil {
 		return err
 	}
-
 	t.Curriculum = curriculum
 	return nil
 }

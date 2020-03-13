@@ -7,6 +7,7 @@ package pkg
 
 import (
 	"github.com/google/wire"
+	"liuyu/stu/pkg/dao"
 	"liuyu/stu/pkg/datasource"
 	"liuyu/stu/pkg/service"
 	"liuyu/stu/pkg/web"
@@ -25,8 +26,12 @@ func New() (*App, error) {
 		Ds:             ds,
 		StudentService: student,
 	}
+	class := &dao.Class{}
+	curriculum := &dao.Curriculum{}
 	teacher := &service.Teacher{
-		Ds: ds,
+		Ds:            ds,
+		ClassDao:      class,
+		CurriculumDao: curriculum,
 	}
 	hdlTeacher := &hdl.Teacher{
 		Ds:             ds,
@@ -41,19 +46,26 @@ func New() (*App, error) {
 	mid := &hdl.Mid{
 		Ds: ds,
 	}
-	curriculum := &service.Curriculum{
+	serviceCurriculum := &service.Curriculum{
 		Ds: ds,
 	}
 	hdlCurriculum := &hdl.Curriculum{
 		Ds:                ds,
-		CurriculumService: curriculum,
+		CurriculumService: serviceCurriculum,
 	}
-	class := &service.Class{
+	serviceClass := &service.Class{
 		Ds: ds,
 	}
 	hdlClass := &hdl.Class{
 		Ds:           ds,
-		ClassService: class,
+		ClassService: serviceClass,
+	}
+	schoolYear := &service.SchoolYear{
+		Ds: ds,
+	}
+	hdlSchoolYear := &hdl.SchoolYear{
+		Ds:                ds,
+		SchoolYearService: schoolYear,
 	}
 	hdlHdl := &hdl.Hdl{
 		Ds:         ds,
@@ -64,6 +76,7 @@ func New() (*App, error) {
 		Mid:        mid,
 		Curriculum: hdlCurriculum,
 		Class:      hdlClass,
+		SchoolYear: hdlSchoolYear,
 	}
 	webWeb := &web.Web{
 		Hdl: hdlHdl,
@@ -83,10 +96,13 @@ var appSet = wire.NewSet(wire.Struct(new(App), "*"), defaultDsOpt,
 	defaultWebOpt, datasource.CreateDs, webSet,
 	helSet,
 	srvSet,
+	daoSet,
 )
 
 var webSet = wire.NewSet(wire.Struct(new(web.Web), "*"))
 
-var helSet = wire.NewSet(wire.Struct(new(hdl.Hdl), "*"), wire.Struct(new(hdl.Student), "*"), wire.Struct(new(hdl.Pub), "*"), wire.Struct(new(hdl.Teacher), "*"), wire.Struct(new(hdl.User), "*"), wire.Struct(new(hdl.Mid), "*"), wire.Struct(new(hdl.Curriculum), "*"), wire.Struct(new(hdl.Class), "*"))
+var helSet = wire.NewSet(wire.Struct(new(hdl.Hdl), "*"), wire.Struct(new(hdl.Student), "*"), wire.Struct(new(hdl.Pub), "*"), wire.Struct(new(hdl.Teacher), "*"), wire.Struct(new(hdl.User), "*"), wire.Struct(new(hdl.Mid), "*"), wire.Struct(new(hdl.Curriculum), "*"), wire.Struct(new(hdl.Class), "*"), wire.Struct(new(hdl.SchoolYear), "*"))
 
-var srvSet = wire.NewSet(wire.Struct(new(service.Teacher), "*"), wire.Struct(new(service.Curriculum), "*"), wire.Struct(new(service.Class), "*"), wire.Struct(new(service.Student), "*"))
+var srvSet = wire.NewSet(wire.Struct(new(service.Teacher), "*"), wire.Struct(new(service.Curriculum), "*"), wire.Struct(new(service.Class), "*"), wire.Struct(new(service.Student), "*"), wire.Struct(new(service.SchoolYear), "*"))
+
+var daoSet = wire.NewSet(wire.Struct(new(dao.Class), "*"), wire.Struct(new(dao.Curriculum), "*"))

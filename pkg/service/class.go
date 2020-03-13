@@ -7,6 +7,7 @@ import (
 
 	"liuyu/stu/pkg/datasource"
 	"liuyu/stu/pkg/model"
+	"liuyu/stu/pkg/ut"
 	"liuyu/stu/pkg/web/hdl/form"
 )
 
@@ -14,30 +15,41 @@ type Class struct {
 	Ds *datasource.Ds
 }
 
-func (p *Class) List(parentId int) ([]*model.Class, error) {
+func (p *Class) List(in *form.ListClass) ([]*model.Class, int, error) {
+
+	db := p.Ds.Db.Table("class c").Select("c.id, c.school_year_id, c.name, s.year, s.pos").
+		Joins("LEFT JOIN school_year s ON c.school_year_id=s.id")
+	if in.Name != "" {
+		db = db.Where("c.name like ?", "%"+in.Name+"%")
+	}
+	if in.Year != "" {
+		db = db.Where("s.year = ?", in.Year)
+	}
+	if in.Pos >= model.Pos_Up && in.Pos <= model.Pos_Down {
+		db = db.Where("s.pos = ?", in.Pos)
+	}
+
+	var count int
+	if err := db.Count(&count).Error; err != nil {
+		return nil, 0, errors.WithStack(err)
+	}
+
 	var clasies []*model.Class
 
-	if err := p.Ds.Db.Model(&model.Class{}).
-		Select("id, parent_id, name").
-		Where("parent_id=?", parentId).
+	_, limit, offset := ut.MakePager(in.Page, in.Limit, 10)
+	if err := db.Limit(limit).Offset(offset).Order("c.id desc").
 		Scan(&clasies).Error; err != nil {
-		return nil, errors.WithStack(err)
+		return nil, 0, errors.WithStack(err)
 	}
 
 	for _, class := range clasies {
-		cls, err := p.List(class.Id)
-		if err != nil {
-			return nil, errors.WithStack(err)
-		}
-		class.Children = cls
-
 		teachers := []*model.Teacher{}
 		if err := p.Ds.Db.Table(model.C_Teacher+" t").
 			Joins("LEFT JOIN teacher_class tc ON tc.teacher_id=t.id").
 			Select("t.id, t.name, t.mobile, t.sex").
 			Where("tc.class_id=?", class.Id).
 			Order("t.id desc").Scan(&teachers).Error; err != nil {
-			return nil, errors.WithStack(err)
+			return nil, 0, errors.WithStack(err)
 		}
 		class.Teacher = teachers
 
@@ -48,7 +60,7 @@ func (p *Class) List(parentId int) ([]*model.Class, error) {
 				Joins("LEFT JOIN teacher_curriculum tc ON c.id=tc.curriculum_id").
 				Where("tc.teacher_id=?", t.Id).
 				Scan(&curriculum).Error; err != nil {
-				return nil, errors.WithStack(err)
+				return nil, 0, errors.WithStack(err)
 			}
 			t.Curriculum = curriculum
 		}
@@ -58,23 +70,34 @@ func (p *Class) List(parentId int) ([]*model.Class, error) {
 			Select("id, code, name, mobile, sex, birthday, intake_time, address").
 			Where("class_id=?", class.Id).
 			Order("id desc").Scan(&students).Error; err != nil {
-			return nil, errors.WithStack(err)
+			return nil, 0, errors.WithStack(err)
 		}
 		class.Student = students
 	}
 
-	return clasies, nil
+	return clasies, count, nil
 }
 
 func (p *Class) ListNameByIds(ids []int) ([]string, error) {
 	var names []string
 
-	if err := p.Ds.Db.Raw(`select concat(c2.name, '-', c1.name) names
-			from class c1, class c2 
-			where c1.id in (?) and c1.parent_id=c2.id`, ids).Order("c1.id desc").Pluck("names", &names).
+	var res []*struct {
+		Name string
+		Year string
+		Pos  model.Pos
+	}
+
+	if err := p.Ds.Db.Raw(`select c.name, s.year, s.pos
+			from class c, school_year s 
+			where c.id in (?) and c.school_year_id=s.id`, ids).Order("c.id desc").Scan(&res).
 		Error; err != nil {
 		return nil, err
 	}
+
+	for _, v := range res {
+		names = append(names, ut.MakeClassName(v.Name, v.Year, v.Pos))
+	}
+
 	return names, nil
 }
 

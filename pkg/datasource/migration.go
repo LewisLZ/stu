@@ -14,6 +14,7 @@ func initAndMigration(ds *Ds) {
 		model.User{},
 		model.Teacher{},
 		model.Curriculum{},
+		model.SchoolYear{},
 		model.Class{},
 		model.TeacherClass{},
 		model.TeacherCurriculum{},

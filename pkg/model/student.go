@@ -17,6 +17,8 @@ type Student struct {
 	Mobile     string `gorm:"not null;size:11" json:"mobile"`      // 联系方式
 
 	ClassName string `gorm:"-" json:"class_name"`
+	Year      string `gorm:"-" json:"year"`
+	Pos       Pos    `gorm:"-" json:"pos"`
 }
 
 type StudentCode struct {
