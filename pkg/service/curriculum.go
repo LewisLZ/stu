@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/jinzhu/copier"
 	"github.com/quexer/utee"
 
 	"liuyu/stu/pkg/datasource"
@@ -61,8 +62,10 @@ func (p *Curriculum) Save(req *form.SaveCurriculum) error {
 	} else {
 		curriculum.Ct = pick
 	}
+	if err := copier.Copy(&curriculum, req); err != nil {
+		return err
+	}
 	curriculum.Mt = pick
-	curriculum.Name = req.Name
 
 	if err := p.Ds.Db.Save(&curriculum).Error; err != nil {
 		return err

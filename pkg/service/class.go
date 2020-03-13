@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
 	"github.com/quexer/utee"
@@ -13,6 +15,25 @@ import (
 
 type Class struct {
 	Ds *datasource.Ds
+}
+
+func (p *Class) Get(id int) (*model.Class, error) {
+	var cla model.Class
+
+	if err := p.Ds.Db.Table("class c").
+		Select("c.id, c.school_year_id, c.name, s.year, s.pos").
+		Joins("LEFT JOIN school_year s ON c.school_year_id=s.id").
+		Where("c.id=?", id).Scan(&cla).Error; err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	tmp, err := time.ParseInLocation("2006", cla.Year, time.Local)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	cla.YearTmp = utee.Tick(tmp)
+
+	return &cla, nil
 }
 
 func (p *Class) List(in *form.ListClass) ([]*model.Class, int, error) {

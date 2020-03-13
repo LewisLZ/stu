@@ -41,6 +41,7 @@ var helSet = wire.NewSet(
 	wire.Struct(new(hdl.Curriculum), "*"),
 	wire.Struct(new(hdl.Class), "*"),
 	wire.Struct(new(hdl.SchoolYear), "*"),
+	wire.Struct(new(hdl.ClassCurriculum), "*"),
 )
 
 var srvSet = wire.NewSet(
@@ -49,9 +50,11 @@ var srvSet = wire.NewSet(
 	wire.Struct(new(service.Class), "*"),
 	wire.Struct(new(service.Student), "*"),
 	wire.Struct(new(service.SchoolYear), "*"),
+	wire.Struct(new(service.ClassCurriculum), "*"),
 )
 
 var daoSet = wire.NewSet(
 	wire.Struct(new(dao.Class), "*"),
 	wire.Struct(new(dao.Curriculum), "*"),
+	wire.Struct(new(dao.ClassCurriculum), "*"),
 )

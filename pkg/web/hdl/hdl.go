@@ -7,15 +7,16 @@ import (
 )
 
 type Hdl struct {
-	Ds         *datasource.Ds
-	Student    *Student
-	Teacher    *Teacher
-	Pub        *Pub
-	User       *User
-	Mid        *Mid
-	Curriculum *Curriculum
-	Class      *Class
-	SchoolYear *SchoolYear
+	Ds              *datasource.Ds
+	Student         *Student
+	Teacher         *Teacher
+	Pub             *Pub
+	User            *User
+	Mid             *Mid
+	Curriculum      *Curriculum
+	Class           *Class
+	SchoolYear      *SchoolYear
+	ClassCurriculum *ClassCurriculum
 }
 
 func (p *Hdl) Mount(rg *gin.RouterGroup) {
@@ -29,5 +30,6 @@ func (p *Hdl) Mount(rg *gin.RouterGroup) {
 		p.Curriculum.Mount(sys.Group("/curriculum"))
 		p.Class.Mount(sys.Group("/class"))
 		p.SchoolYear.Mount(sys.Group("/schoolyear"))
+		p.ClassCurriculum.Mount(sys.Group("/classcurriculum"))
 	}
 }

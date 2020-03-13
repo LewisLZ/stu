@@ -31,4 +31,5 @@ type Class struct {
 	Student []*Student `gorm:"-" json:"student"`
 	Year    string     `gorm:"-" json:"year"`
 	Pos     Pos        `gorm:"-" json:"pos"`
+	YearTmp int64      `gorm:"-" json:"year_tmp"`
 }

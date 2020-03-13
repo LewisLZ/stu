@@ -67,16 +67,26 @@ func New() (*App, error) {
 		Ds:                ds,
 		SchoolYearService: schoolYear,
 	}
+	classCurriculum := &dao.ClassCurriculum{}
+	serviceClassCurriculum := &service.ClassCurriculum{
+		Ds:                 ds,
+		ClassCurriculumDao: classCurriculum,
+	}
+	hdlClassCurriculum := &hdl.ClassCurriculum{
+		Ds:                     ds,
+		ClassCurriculumService: serviceClassCurriculum,
+	}
 	hdlHdl := &hdl.Hdl{
-		Ds:         ds,
-		Student:    hdlStudent,
-		Teacher:    hdlTeacher,
-		Pub:        pub,
-		User:       user,
-		Mid:        mid,
-		Curriculum: hdlCurriculum,
-		Class:      hdlClass,
-		SchoolYear: hdlSchoolYear,
+		Ds:              ds,
+		Student:         hdlStudent,
+		Teacher:         hdlTeacher,
+		Pub:             pub,
+		User:            user,
+		Mid:             mid,
+		Curriculum:      hdlCurriculum,
+		Class:           hdlClass,
+		SchoolYear:      hdlSchoolYear,
+		ClassCurriculum: hdlClassCurriculum,
 	}
 	webWeb := &web.Web{
 		Hdl: hdlHdl,
@@ -101,8 +111,8 @@ var appSet = wire.NewSet(wire.Struct(new(App), "*"), defaultDsOpt,
 
 var webSet = wire.NewSet(wire.Struct(new(web.Web), "*"))
 
-var helSet = wire.NewSet(wire.Struct(new(hdl.Hdl), "*"), wire.Struct(new(hdl.Student), "*"), wire.Struct(new(hdl.Pub), "*"), wire.Struct(new(hdl.Teacher), "*"), wire.Struct(new(hdl.User), "*"), wire.Struct(new(hdl.Mid), "*"), wire.Struct(new(hdl.Curriculum), "*"), wire.Struct(new(hdl.Class), "*"), wire.Struct(new(hdl.SchoolYear), "*"))
+var helSet = wire.NewSet(wire.Struct(new(hdl.Hdl), "*"), wire.Struct(new(hdl.Student), "*"), wire.Struct(new(hdl.Pub), "*"), wire.Struct(new(hdl.Teacher), "*"), wire.Struct(new(hdl.User), "*"), wire.Struct(new(hdl.Mid), "*"), wire.Struct(new(hdl.Curriculum), "*"), wire.Struct(new(hdl.Class), "*"), wire.Struct(new(hdl.SchoolYear), "*"), wire.Struct(new(hdl.ClassCurriculum), "*"))
 
-var srvSet = wire.NewSet(wire.Struct(new(service.Teacher), "*"), wire.Struct(new(service.Curriculum), "*"), wire.Struct(new(service.Class), "*"), wire.Struct(new(service.Student), "*"), wire.Struct(new(service.SchoolYear), "*"))
+var srvSet = wire.NewSet(wire.Struct(new(service.Teacher), "*"), wire.Struct(new(service.Curriculum), "*"), wire.Struct(new(service.Class), "*"), wire.Struct(new(service.Student), "*"), wire.Struct(new(service.SchoolYear), "*"), wire.Struct(new(service.ClassCurriculum), "*"))
 
-var daoSet = wire.NewSet(wire.Struct(new(dao.Class), "*"), wire.Struct(new(dao.Curriculum), "*"))
+var daoSet = wire.NewSet(wire.Struct(new(dao.Class), "*"), wire.Struct(new(dao.Curriculum), "*"), wire.Struct(new(dao.ClassCurriculum), "*"))

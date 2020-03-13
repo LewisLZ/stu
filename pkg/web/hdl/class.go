@@ -16,6 +16,7 @@ type Class struct {
 }
 
 func (p *Class) Mount(g *gin.RouterGroup) {
+	g.GET("", p.Get)
 	g.GET("/list", p.List)
 	g.GET("/listNameByIds", p.ListNameByIds)
 	g.POST("/create", p.Save(false))
@@ -23,6 +24,19 @@ func (p *Class) Mount(g *gin.RouterGroup) {
 	g.DELETE("/delete", p.Delete)
 }
 
+func (p *Class) Get(c *gin.Context) {
+	var req struct {
+		Id int `form:"id"`
+	}
+	if err := c.Bind(&req); err != nil {
+		c.String(400, "参数错误")
+		return
+	}
+	res, err := p.ClassService.Get(req.Id)
+	utee.Chk(err)
+
+	c.JSON(200, res)
+}
 func (p *Class) List(c *gin.Context) {
 	var req form.ListClass
 	if err := c.Bind(&req); err != nil {
