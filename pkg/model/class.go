@@ -12,4 +12,5 @@ type Class struct {
 
 	Children []*Class   `gorm:"-" json:"children"` // 子结构
 	Teacher  []*Teacher `gorm:"-" json:"teacher"`
+	Student  []*Student `gorm:"-" json:"student"`
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/jinzhu/copier"
+	"github.com/pkg/errors"
 	"github.com/quexer/utee"
 
 	"liuyu/stu/pkg/datasource"
@@ -16,30 +17,50 @@ type Class struct {
 func (p *Class) List(parentId int) ([]*model.Class, error) {
 	var clasies []*model.Class
 
-	err := p.Ds.Db.Model(&model.Class{}).
+	if err := p.Ds.Db.Model(&model.Class{}).
 		Select("id, parent_id, name").
 		Where("parent_id=?", parentId).
-		Scan(&clasies).Error
-
-	if err != nil {
-		return nil, err
+		Scan(&clasies).Error; err != nil {
+		return nil, errors.WithStack(err)
 	}
 
 	for _, class := range clasies {
 		cls, err := p.List(class.Id)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		class.Children = cls
 
 		teachers := []*model.Teacher{}
 		if err := p.Ds.Db.Table(model.C_Teacher+" t").
 			Joins("LEFT JOIN teacher_class tc ON tc.teacher_id=t.id").
-			Select("t.id, t.name, t.mobile").
-			Where("tc.class_id=?", class.Id).Order("t.id desc").Scan(&teachers).Error; err != nil {
-			return nil, err
+			Select("t.id, t.name, t.mobile, t.sex").
+			Where("tc.class_id=?", class.Id).
+			Order("t.id desc").Scan(&teachers).Error; err != nil {
+			return nil, errors.WithStack(err)
 		}
 		class.Teacher = teachers
+
+		for _, t := range class.Teacher {
+			curriculum := []*model.Curriculum{}
+			if err := p.Ds.Db.Table(model.C_Curriculum+" c").
+				Select("c.id, c.name").
+				Joins("LEFT JOIN teacher_curriculum tc ON c.id=tc.curriculum_id").
+				Where("tc.teacher_id=?", t.Id).
+				Scan(&curriculum).Error; err != nil {
+				return nil, errors.WithStack(err)
+			}
+			t.Curriculum = curriculum
+		}
+
+		students := []*model.Student{}
+		if err := p.Ds.Db.Table(model.C_Student).
+			Select("id, code, name, mobile, sex, birthday, intake_time, address").
+			Where("class_id=?", class.Id).
+			Order("id desc").Scan(&students).Error; err != nil {
+			return nil, errors.WithStack(err)
+		}
+		class.Student = students
 	}
 
 	return clasies, nil
