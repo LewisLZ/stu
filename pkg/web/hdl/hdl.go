@@ -8,7 +8,7 @@ import (
 
 type Hdl struct {
 	Ds         *datasource.Ds
-	Stu        *Stu
+	Student    *Student
 	Teacher    *Teacher
 	Pub        *Pub
 	User       *User
@@ -24,9 +24,8 @@ func (p *Hdl) Mount(rg *gin.RouterGroup) {
 	{
 		p.User.Mount(sys.Group("/user"))
 		p.Teacher.Mount(sys.Group("/teacher"))
-		p.Stu.Mount(sys.Group("/stu"))
+		p.Student.Mount(sys.Group("/student"))
 		p.Curriculum.Mount(sys.Group("/curriculum"))
 		p.Class.Mount(sys.Group("/class"))
 	}
-
 }

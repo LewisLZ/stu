@@ -45,6 +45,10 @@ func (p *Teacher) List(c *gin.Context) {
 		c.String(400, "参数错误")
 		return
 	}
+	if req.Sex < model.SexUnknown || req.Sex > model.SexGirl {
+		c.String(400, "性别错误")
+		return
+	}
 
 	teachers, count, err := p.TeacherService.List(&req)
 	utee.Chk(err)

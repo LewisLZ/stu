@@ -31,7 +31,7 @@ var webSet = wire.NewSet(
 
 var helSet = wire.NewSet(
 	wire.Struct(new(hdl.Hdl), "*"),
-	wire.Struct(new(hdl.Stu), "*"),
+	wire.Struct(new(hdl.Student), "*"),
 	wire.Struct(new(hdl.Pub), "*"),
 	wire.Struct(new(hdl.Teacher), "*"),
 	wire.Struct(new(hdl.User), "*"),

@@ -1,5 +1,7 @@
 package form
 
+import "liuyu/stu/pkg/model"
+
 type SaveTeacher struct {
 	Id            int    `json:"id"`
 	Name          string `json:"name"`
@@ -10,8 +12,9 @@ type SaveTeacher struct {
 }
 
 type ListTeacher struct {
-	Page   int    `form:"page"`
-	Limit  int    `form:"limit"`
-	Name   string `form:"name"`
-	Mobile string `form:"mobile"`
+	Page   int       `form:"page"`
+	Limit  int       `form:"limit"`
+	Sex    model.Sex `form:"sex"`
+	Name   string    `form:"name"`
+	Mobile string    `form:"mobile"`
 }

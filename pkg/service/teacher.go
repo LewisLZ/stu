@@ -51,6 +51,9 @@ func (p *Teacher) List(in *form.ListTeacher) ([]*model.Teacher, int, error) {
 	if in.Mobile != "" {
 		db = db.Where("mobile like ?", "%"+in.Mobile+"%")
 	}
+	if in.Sex > model.SexUnknown {
+		db = db.Where("sex = ?", in.Sex)
+	}
 
 	var teachers []*model.Teacher
 	var count int

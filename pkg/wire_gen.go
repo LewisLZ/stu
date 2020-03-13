@@ -18,7 +18,7 @@ import (
 func New() (*App, error) {
 	opt := defaultDsOpt()
 	ds := datasource.CreateDs(opt)
-	stu := &hdl.Stu{}
+	student := &hdl.Student{}
 	teacher := &service.Teacher{
 		Ds: ds,
 	}
@@ -51,7 +51,7 @@ func New() (*App, error) {
 	}
 	hdlHdl := &hdl.Hdl{
 		Ds:         ds,
-		Stu:        stu,
+		Student:    student,
 		Teacher:    hdlTeacher,
 		Pub:        pub,
 		User:       user,
@@ -81,6 +81,6 @@ var appSet = wire.NewSet(wire.Struct(new(App), "*"), defaultDsOpt,
 
 var webSet = wire.NewSet(wire.Struct(new(web.Web), "*"))
 
-var helSet = wire.NewSet(wire.Struct(new(hdl.Hdl), "*"), wire.Struct(new(hdl.Stu), "*"), wire.Struct(new(hdl.Pub), "*"), wire.Struct(new(hdl.Teacher), "*"), wire.Struct(new(hdl.User), "*"), wire.Struct(new(hdl.Mid), "*"), wire.Struct(new(hdl.Curriculum), "*"), wire.Struct(new(hdl.Class), "*"))
+var helSet = wire.NewSet(wire.Struct(new(hdl.Hdl), "*"), wire.Struct(new(hdl.Student), "*"), wire.Struct(new(hdl.Pub), "*"), wire.Struct(new(hdl.Teacher), "*"), wire.Struct(new(hdl.User), "*"), wire.Struct(new(hdl.Mid), "*"), wire.Struct(new(hdl.Curriculum), "*"), wire.Struct(new(hdl.Class), "*"))
 
 var srvSet = wire.NewSet(wire.Struct(new(service.Teacher), "*"), wire.Struct(new(service.Curriculum), "*"), wire.Struct(new(service.Class), "*"))
