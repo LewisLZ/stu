@@ -17,6 +17,7 @@ type Hdl struct {
 	Class           *Class
 	SchoolYear      *SchoolYear
 	ClassCurriculum *ClassCurriculum
+	Examination     *Examination
 }
 
 func (p *Hdl) Mount(rg *gin.RouterGroup) {
@@ -31,5 +32,6 @@ func (p *Hdl) Mount(rg *gin.RouterGroup) {
 		p.Class.Mount(sys.Group("/class"))
 		p.SchoolYear.Mount(sys.Group("/schoolyear"))
 		p.ClassCurriculum.Mount(sys.Group("/classcurriculum"))
+		p.Examination.Mount(sys.Group("/examination"))
 	}
 }
