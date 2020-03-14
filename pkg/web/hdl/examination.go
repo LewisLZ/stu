@@ -115,11 +115,12 @@ func (p *Examination) ClassList(c *gin.Context) {
 		c.String(400, "考试Id不能为空")
 		return
 	}
-	ecs, err := p.ExaminationService.ClassList(&req)
+	ecs, canEdit, err := p.ExaminationService.ClassList(&req)
 	utee.Chk(err)
 
 	c.JSON(200, utee.J{
-		"data": ecs,
+		"data":     ecs,
+		"can_edit": canEdit,
 	})
 }
 

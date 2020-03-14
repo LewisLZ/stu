@@ -60,22 +60,25 @@ func (p *Examination) List(in *form.ListExamination) ([]*model.Examination, int,
 
 func (p *Examination) Save(in *form.SaveExamination) error {
 	var examination model.Examination
-	pick := utee.Tick()
+	tick := utee.Tick()
 	if in.Id != 0 {
 		if err := p.Ds.Db.First(&examination, in.Id).Error; err != nil {
 			return err
 		}
 	} else {
-		examination.Ct = pick
+		examination.Ct = tick
 	}
 	if err := copier.Copy(&examination, in); err != nil {
 		return err
 	}
 	start, err := time.ParseInLocation("2006-01-02", in.StartTime, time.Local)
 	if err != nil {
-		return ut.NewValidateError("开始时间格式不对")
+		return ut.NewValidateError("考试时间格式不对")
 	}
-	examination.Mt = pick
+	if utee.Tick(start) <= tick {
+		return ut.NewValidateError("考试时间不能小于或等于当前时间")
+	}
+	examination.Mt = tick
 	examination.StartTime = utee.Tick(start)
 
 	if err := p.Ds.Db.Save(&examination).Error; err != nil {
@@ -84,7 +87,7 @@ func (p *Examination) Save(in *form.SaveExamination) error {
 	return nil
 }
 
-func (p *Examination) ClassList(in *form.ListExaminationClass) ([]*model.ExaminationClass, error) {
+func (p *Examination) ClassList(in *form.ListExaminationClass) ([]*model.ExaminationClass, bool, error) {
 	var ecs []*model.ExaminationClass
 
 	if err := p.Ds.Db.Table("examination_class ec").
@@ -93,7 +96,7 @@ func (p *Examination) ClassList(in *form.ListExaminationClass) ([]*model.Examina
 		Joins("LEFT JOIN school_year s ON s.id=c.school_year_id").
 		Where("ec.examination_id=?", in.ExaminationId).
 		Order("ec.id desc").Scan(&ecs).Error; err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	for _, ec := range ecs {
@@ -107,7 +110,7 @@ func (p *Examination) ClassList(in *form.ListExaminationClass) ([]*model.Examina
 			Joins("LEFT JOIN curriculum c ON c.id=cc.curriculum_id").
 			Select("ecc.id, ecc.examination_class_id, ecc.class_curriculum_id, ccy.year class_curriculum_year, ccy.pos class_curriculum_pos, c.name class_curriculum_name").
 			Where("ecc.examination_class_id=?", ec.Id).Scan(&ecc).Error; err != nil {
-			return nil, err
+			return nil, false, err
 		}
 
 		for _, v := range ecc {
@@ -117,7 +120,19 @@ func (p *Examination) ClassList(in *form.ListExaminationClass) ([]*model.Examina
 		ec.ExaminationClassCurriculum = ecc
 	}
 
-	return ecs, nil
+	var examination struct {
+		StartTime int64
+	}
+	if err := p.Ds.Db.Model(&model.Examination{}).
+		Select("start_time").
+		Where("id=?", in.ExaminationId).
+		Scan(&examination).Error; err != nil {
+		return nil, false, err
+	}
+
+	canEdit := examination.StartTime > utee.Tick()
+
+	return ecs, canEdit, nil
 }
 
 func (p *Examination) ClassSave(in *form.SaveExaminationClass) error {
