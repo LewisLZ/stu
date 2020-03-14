@@ -10,3 +10,11 @@ type ListCurriculum struct {
 	Limit int    `form:"limit"`
 	Name  string `form:"name"`
 }
+
+type ListCurriculumForExamination struct {
+	ClassId int `form:"class_id"`
+}
+
+type ListCurriculumChoose struct {
+	CCYearId int `form:"cc_year_id"`
+}

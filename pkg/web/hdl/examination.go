@@ -21,6 +21,17 @@ func (p *Examination) Mount(g *gin.RouterGroup) {
 	g.POST("/create", p.Save(false))
 	g.POST("/update", p.Save(true))
 	g.DELETE("/delete", p.Delete)
+
+	cla := g.Group("/class")
+	{
+		cla.GET("/list", p.ClassList)
+		cla.POST("/create", p.ClassCreate)
+		cla.DELETE("/delete", p.ClassDelete)
+	}
+	cc := g.Group("/classcurriculum")
+	{
+		cc.POST("/create", p.ClassCurriculumCreate)
+	}
 }
 
 func (p *Examination) List(c *gin.Context) {
@@ -92,4 +103,90 @@ func (p *Examination) Delete(c *gin.Context) {
 
 	utee.Chk(p.Ds.Db.Where("id=?", req.Id).Delete(&model.Examination{}).Error)
 	c.JSON(200, "ok")
+}
+
+func (p *Examination) ClassList(c *gin.Context) {
+	var req form.ListExaminationClass
+	if err := c.Bind(&req); err != nil {
+		c.String(400, "参数错误")
+		return
+	}
+	if req.ExaminationId == 0 {
+		c.String(400, "考试Id不能为空")
+		return
+	}
+	ecs, err := p.ExaminationService.ClassList(&req)
+	utee.Chk(err)
+
+	c.JSON(200, utee.J{
+		"data": ecs,
+	})
+}
+
+func (p *Examination) ClassCreate(c *gin.Context) {
+	var req form.SaveExaminationClass
+	if err := c.Bind(&req); err != nil {
+		c.String(400, "参数错误")
+		return
+	}
+	val := func(req *form.SaveExaminationClass) (bool, string) {
+		if req.ExaminationId == 0 {
+			return false, "考试Id不能为空"
+		}
+		if req.ClassId == 0 {
+			return false, "班级不能为空"
+		}
+		return true, ""
+	}
+	ok, str := val(&req)
+	if !ok {
+		c.String(400, str)
+		return
+	}
+	err := p.ExaminationService.ClassSave(&req)
+	if ut.IsValidateError(err) {
+		c.String(400, err.Error())
+		return
+	}
+	utee.Chk(err)
+	c.String(200, "OK")
+}
+
+func (p *Examination) ClassDelete(c *gin.Context) {
+	var req struct {
+		Id int `form:"id"`
+	}
+	if err := c.Bind(&req); err != nil {
+		c.String(400, "参数错误")
+		return
+	}
+
+	utee.Chk(p.Ds.Db.Where("id=?", req.Id).Delete(&model.ExaminationClass{}).Error)
+	c.JSON(200, "ok")
+}
+
+func (p *Examination) ClassCurriculumCreate(c *gin.Context) {
+	var req form.SaveExaminationClassCurriculum
+	if err := c.Bind(&req); err != nil {
+		c.String(400, "参数错误")
+		return
+	}
+	val := func(req *form.SaveExaminationClassCurriculum) (bool, string) {
+		if req.ExaminationClassId == 0 {
+			return false, "考试Id不能为空"
+		}
+		return true, ""
+	}
+	ok, str := val(&req)
+	if !ok {
+		c.String(400, str)
+		return
+	}
+	err := p.ExaminationService.ClassCurriculumSave(&req)
+	if ut.IsValidateError(err) {
+		c.String(400, err.Error())
+		return
+	}
+	utee.Chk(err)
+	c.String(200, "OK")
 }

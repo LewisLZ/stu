@@ -13,10 +13,19 @@ type ExaminationClass struct {
 	Base
 	ExaminationId int `gorm:"not null" json:"examination_id"`
 	ClassId       int `gorm:"not null" json:"class_id"`
+
+	Year                       string                        `gorm:"-" json:"-"`
+	Pos                        Pos                           `gorm:"-" json:"-"`
+	ClassName                  string                        `gorm:"-" json:"class_name"`
+	ExaminationClassCurriculum []*ExaminationClassCurriculum `gorm:"-" json:"examination_class_curriculum"`
 }
 
-type ExaminationCurriculum struct {
+type ExaminationClassCurriculum struct {
 	Base
 	ExaminationClassId int `gorm:"not null" json:"examination_class_id"`
-	CurriculumId       int `gorm:"not null" json:"curriculum_id"`
+	ClassCurriculumId  int `gorm:"not null" json:"class_curriculum_id"`
+
+	ClassCurriculumName string `gorm:"-" json:"class_curriculum_name"`
+	ClassCurriculumYear string `gorm:"-" json:"-"`
+	ClassCurriculumPos  Pos    `gorm:"-" json:"-"`
 }

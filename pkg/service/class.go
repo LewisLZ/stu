@@ -95,6 +95,12 @@ func (p *Class) List(in *form.ListClass) ([]*model.Class, int, error) {
 		}
 		class.Student = students
 
+		if err := p.Ds.Db.Model(&model.ClassCurriculumYear{}).
+			Where("class_id=?", class.Id).
+			Count(&class.ClassCurriculumYearCount).
+			Error; err != nil {
+			return nil, 0, err
+		}
 	}
 
 	return clasies, count, nil

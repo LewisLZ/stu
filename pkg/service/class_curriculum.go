@@ -8,6 +8,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/quexer/utee"
 
+	mapset "github.com/deckarep/golang-set"
+
 	"liuyu/stu/pkg/dao"
 	"liuyu/stu/pkg/datasource"
 	"liuyu/stu/pkg/model"
@@ -24,15 +26,38 @@ func (p *ClassCurriculum) Create(req *form.SaveClassCurriculum) error {
 
 	err := datasource.RunTransaction(p.Ds.Db, func(tx *gorm.DB) error {
 
-		if err := tx.Where("cc_year_id=?", req.CCYearId).Delete(&model.ClassCurriculum{}).Error; err != nil {
+		var ids []int
+		if err := tx.Model(&model.ClassCurriculum{}).
+			Select("curriculum_id").
+			Where("cc_year_id=?", req.CCYearId).
+			Pluck("curriculum_id", &ids).Error; err != nil {
 			return err
 		}
 
+		dataSet := mapset.NewSet()
+		for _, item := range ids {
+			dataSet.Add(item)
+		}
+		inSet := mapset.NewSet()
+		for _, item := range req.CurriculumIds {
+			inSet.Add(item)
+		}
+
+		deleteIds := dataSet.Difference(inSet)
+		addIds := inSet.Difference(dataSet)
+
+		for _, id := range deleteIds.ToSlice() {
+			if err := tx.Where("cc_year_id=? AND curriculum_id=?", req.CCYearId, id).
+				Delete(&model.ClassCurriculum{}).Error; err != nil {
+				return err
+			}
+		}
+
 		tick := utee.Tick()
-		for _, id := range req.CurriculumIds {
+		for _, id := range addIds.ToSlice() {
 			cc := model.ClassCurriculum{}
 			cc.CCYearId = req.CCYearId
-			cc.CurriculumId = id
+			cc.CurriculumId = id.(int)
 			cc.Ct = tick
 			cc.Mt = tick
 			if err := tx.Create(&cc).Error; err != nil {

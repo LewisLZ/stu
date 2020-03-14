@@ -27,9 +27,10 @@ type Class struct {
 	SchoolYearId int    `gorm:"not null;unique_index:uidx_parent_name_class" json:"school_year_id"` // 上级Id
 	Name         string `gorm:"not null;unique_index:uidx_parent_name_class" json:"name"`           // 班级
 
-	Teacher []*Teacher `gorm:"-" json:"teacher"`
-	Student []*Student `gorm:"-" json:"student"`
-	Year    string     `gorm:"-" json:"year"`
-	Pos     Pos        `gorm:"-" json:"pos"`
-	YearTmp int64      `gorm:"-" json:"year_tmp"`
+	Teacher                  []*Teacher `gorm:"-" json:"teacher"`
+	Student                  []*Student `gorm:"-" json:"student"`
+	Year                     string     `gorm:"-" json:"year"`
+	Pos                      Pos        `gorm:"-" json:"pos"`
+	YearTmp                  int64      `gorm:"-" json:"year_tmp"`
+	ClassCurriculumYearCount int        `gorm:"-" json:"class_curriculum_year_count"`
 }

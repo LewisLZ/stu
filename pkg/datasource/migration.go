@@ -22,7 +22,7 @@ func initAndMigration(ds *Ds) {
 		model.ClassCurriculum{},
 		model.Examination{},
 		model.ExaminationClass{},
-		model.ExaminationCurriculum{},
+		model.ExaminationClassCurriculum{},
 	).Error
 	utee.Chk(err)
 }
