@@ -125,7 +125,7 @@ func (p *ClassCurriculum) YearSave(req *form.SaveClassCurriculumYear) error {
 	if reqTmp.Before(schoolTmp) {
 		return ut.NewValidateError("年份不能小于班级")
 	}
-	fmt.Println("=====", reqTmp, schoolTmp)
+
 	if reqTmp.Equal(schoolTmp) && req.Pos < school.Pos {
 		return ut.NewValidateError("年份等于班级时月份不能小于班级")
 	}
