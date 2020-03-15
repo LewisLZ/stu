@@ -61,26 +61,18 @@ func (p *Achievement) List(in *form.ListAchievement) ([]*model.Achievement, int,
 func (p *Achievement) ListStudentScore(in *form.ListAchievementStudentScore) (interface{}, error) {
 	sql := `SELECT s.score,
 				   s.mt    score_mt,
-				   c.name  class_curriculum_name,
-				   t.name  class_teacher_name,
-				   t2.name curriculum_teacher_name
+				   c.name  class_curriculum_name
 			FROM score s
 					 LEFT JOIN class_curriculum cc ON cc.id = s.class_curriculum_id
 					 LEFT JOIN curriculum c ON c.id = cc.curriculum_id
 					 LEFT JOIN class_curriculum_year ccy ON ccy.id = cc.cc_year_id
 					 LEFT JOIN class cl ON ccy.class_id = cl.id
-					 LEFT JOIN teacher_class tc ON tc.class_id = cl.id
-					 LEFT JOIN teacher t ON t.id = tc.teacher_id
-					 LEFT JOIN teacher_curriculum tcc ON tcc.curriculum_id = cc.curriculum_id
-					 LEFT JOIN teacher t2 ON t2.id = tcc.teacher_id
 			where s.student_id = ? and s.examination_class_id = ? ORDER BY s.mt DESC`
 
 	var res []*struct {
-		Score                 int    `json:"score"`
-		ScoreMt               int64  `json:"score_mt"`
-		ClassCurriculumName   string `json:"class_curriculum_name"`
-		ClassTeacherName      string `json:"class_teacher_name"`
-		CurriculumTeacherName string `json:"curriculum_teacher_name"`
+		Score               int    `json:"score"`
+		ScoreMt             int64  `json:"score_mt"`
+		ClassCurriculumName string `json:"class_curriculum_name"`
 	}
 	if err := p.Ds.Db.Raw(sql, in.StudentId, in.ExaminationClassId).Scan(&res).Error; err != nil {
 		return nil, err
