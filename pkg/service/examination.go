@@ -91,7 +91,7 @@ func (p *Examination) ClassList(in *form.ListExaminationClass) ([]*model.Examina
 	var ecs []*model.ExaminationClass
 
 	if err := p.Ds.Db.Table("examination_class ec").
-		Select("ec.id, ec.examination_id, ec.class_id, c.name class_name, s.year, s.pos").
+		Select("ec.id, ec.examination_id, ec.class_id, c.name class_name, s.year, s.pos, ec.status").
 		Joins("LEFT JOIN class c ON c.id=ec.class_id").
 		Joins("LEFT JOIN school_year s ON s.id=c.school_year_id").
 		Where("ec.examination_id=?", in.ExaminationId).

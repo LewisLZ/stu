@@ -1,5 +1,12 @@
 package model
 
+type ECStatus int
+
+const (
+	ECStatus_Edit     = 0
+	ECStatus_Archived = 1
+)
+
 type Examination struct {
 	Base
 	Name      string `gorm:"not null;size:10" json:"name"`
@@ -11,8 +18,9 @@ type Examination struct {
 
 type ExaminationClass struct {
 	Base
-	ExaminationId int `gorm:"not null" json:"examination_id"`
-	ClassId       int `gorm:"not null" json:"class_id"`
+	ExaminationId int      `gorm:"not null" json:"examination_id"`
+	ClassId       int      `gorm:"not null" json:"class_id"`
+	Status        ECStatus `gorm:"not null" json:"status"`
 
 	Year                       string                        `gorm:"-" json:"-"`
 	Pos                        Pos                           `gorm:"-" json:"-"`
