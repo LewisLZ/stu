@@ -60,18 +60,6 @@ func (p *SchoolYear) List(in *form.ListSchoolYear) ([]*model.SchoolYear, int, er
 	return schoolYears, count, nil
 }
 
-func (p *SchoolYear) ListNameByIds(ids []int) ([]string, error) {
-	var names []string
-
-	if err := p.Ds.Db.Raw(`select concat(c2.name, '-', c1.name) names
-			from class c1, class c2 
-			where c1.id in (?) and c1.parent_id=c2.id`, ids).Order("c1.id desc").Pluck("names", &names).
-		Error; err != nil {
-		return nil, err
-	}
-	return names, nil
-}
-
 func (p *SchoolYear) Save(in *form.SaveSchoolYear) error {
 	sy := model.SchoolYear{}
 	tick := utee.Tick()

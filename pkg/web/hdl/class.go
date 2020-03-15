@@ -119,14 +119,6 @@ func (p *Class) Delete(c *gin.Context) {
 		return
 	}
 
-	var count int
-	utee.Chk(p.Ds.Db.Model(model.Class{}).Where("parent_id=?", req.Id).Count(&count).Error)
-
-	if count > 0 {
-		c.String(400, "有下级班级不可删除")
-		return
-	}
-
 	utee.Chk(p.Ds.Db.Where("id=?", req.Id).Delete(&model.Class{}).Error)
 	c.JSON(200, "ok")
 }

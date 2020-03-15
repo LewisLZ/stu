@@ -17,7 +17,6 @@ type SchoolYear struct {
 
 func (p *SchoolYear) Mount(g *gin.RouterGroup) {
 	g.GET("/list", p.List)
-	g.GET("/listNameByIds", p.ListNameByIds)
 	g.POST("/create", p.Save(false))
 	g.POST("/update", p.Save(true))
 	g.DELETE("/delete", p.Delete)
@@ -37,30 +36,6 @@ func (p *SchoolYear) List(c *gin.Context) {
 		"limit": req.Limit,
 		"total": total,
 		"data":  sy,
-	})
-}
-
-func (p *SchoolYear) ListNameByIds(c *gin.Context) {
-	var req struct {
-		Ids []int `form:"ids"`
-	}
-	if err := c.Bind(&req); err != nil {
-		c.String(400, "参数错误")
-		return
-	}
-
-	if len(req.Ids) == 0 {
-		c.JSON(200, utee.J{
-			"data": []string{},
-		})
-		return
-	}
-
-	names, err := p.SchoolYearService.ListNameByIds(req.Ids)
-	utee.Chk(err)
-
-	c.JSON(200, utee.J{
-		"data": names,
 	})
 }
 
