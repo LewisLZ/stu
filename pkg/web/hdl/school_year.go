@@ -7,6 +7,7 @@ import (
 	"liuyu/stu/pkg/datasource"
 	"liuyu/stu/pkg/model"
 	"liuyu/stu/pkg/service"
+	"liuyu/stu/pkg/ut"
 	"liuyu/stu/pkg/web/hdl/form"
 )
 
@@ -65,8 +66,12 @@ func (p *SchoolYear) Save(update bool) gin.HandlerFunc {
 			return
 		}
 
-		utee.Chk(p.SchoolYearService.Save(&req))
-
+		err := p.SchoolYearService.Save(&req)
+		if ut.IsValidateError(err) {
+			c.String(400, err.Error())
+			return
+		}
+		utee.Chk(err)
 		c.String(200, "OK")
 	}
 }

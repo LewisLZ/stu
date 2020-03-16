@@ -295,9 +295,10 @@ func (p *Achievement) ListSource(in *form.ListAchievementSource) (interface{}, e
 
 func (p *Achievement) SaveScore(in []*form.SaveAchievementScore) error {
 	return datasource.RunTransaction(p.Ds.Db, func(tx *gorm.DB) error {
-		sql := `UPDATE score SET score=? WHERE examination_class_id=? AND student_id=? AND class_curriculum_id=?`
+		sql := `UPDATE score SET score=?, mt=? WHERE examination_class_id=? AND student_id=? AND class_curriculum_id=?`
+		tick := utee.Tick()
 		for _, v := range in {
-			if err := tx.Exec(sql, v.Score, v.ExaminationClassId, v.StudentId, v.ClassCurriculumId).Error; err != nil {
+			if err := tx.Exec(sql, v.Score, tick, v.ExaminationClassId, v.StudentId, v.ClassCurriculumId).Error; err != nil {
 				return err
 			}
 		}

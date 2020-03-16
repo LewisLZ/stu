@@ -75,7 +75,11 @@ func (p *SchoolYear) Save(in *form.SaveSchoolYear) error {
 	}
 	sy.Mt = tick
 
-	if err := p.Ds.Db.Save(&sy).Error; err != nil {
+	err := p.Ds.Db.Save(&sy).Error
+	if datasource.Duplicate(err) {
+		return ut.NewValidateError("学年不可重复创建")
+	}
+	if err != nil {
 		return errors.WithStack(err)
 	}
 	return nil

@@ -143,7 +143,11 @@ func (p *Examination) ClassSave(in *form.SaveExaminationClass) error {
 	ec.Ct = tick
 	ec.Mt = tick
 
-	if err := p.Ds.Db.Create(&ec).Error; err != nil {
+	err := p.Ds.Db.Create(&ec).Error
+	if datasource.Duplicate(err) {
+		return ut.NewValidateError("不可重复创建考试班级")
+	}
+	if err != nil {
 		return err
 	}
 	return nil

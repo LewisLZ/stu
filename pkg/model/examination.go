@@ -18,8 +18,8 @@ type Examination struct {
 
 type ExaminationClass struct {
 	Base
-	ExaminationId int      `gorm:"not null" json:"examination_id"`
-	ClassId       int      `gorm:"not null" json:"class_id"`
+	ExaminationId int      `gorm:"not null;unique_index:uidx_eid_cid_ec" json:"examination_id"`
+	ClassId       int      `gorm:"not null;unique_index:uidx_eid_cid_ec" json:"class_id"`
 	Status        ECStatus `gorm:"not null" json:"status"`
 
 	Year                       string                        `gorm:"-" json:"-"`
