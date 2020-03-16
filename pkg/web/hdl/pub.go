@@ -25,14 +25,14 @@ func (p *Pub) Login(c *gin.Context) {
 		c.String(400, "参数错误")
 		return
 	}
-	if req.Account == "" || req.Passwd == "" {
-		c.String(400, "account / passwd required")
+	if req.Mobile == "" || req.Passwd == "" {
+		c.String(400, "mobile / passwd required")
 		return
 	}
 
 	var user model.User
 
-	if result := p.Ds.Db.Where("account = ? and passwd = ?", req.Account, ut.Passwd(req.Passwd)).First(&user); result.Error != nil {
+	if result := p.Ds.Db.Where("mobile = ? and passwd = ?", req.Mobile, ut.Passwd(req.Passwd)).First(&user); result.Error != nil {
 		if result.RecordNotFound() {
 			c.String(400, "登录失败")
 			return
@@ -44,6 +44,7 @@ func (p *Pub) Login(c *gin.Context) {
 		"id":     user.Id,
 		"name":   user.Name,
 		"mobile": user.Mobile,
+		"type":   user.Type,
 	}
 
 	utee.Chk(SetWebSession(c, &user))

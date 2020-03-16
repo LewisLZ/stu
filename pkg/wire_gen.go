@@ -40,8 +40,12 @@ func New() (*App, error) {
 	pub := &hdl.Pub{
 		Ds: ds,
 	}
-	user := &hdl.User{
+	user := &service.User{
 		Ds: ds,
+	}
+	hdlUser := &hdl.User{
+		Ds:          ds,
+		UserService: user,
 	}
 	mid := &hdl.Mid{
 		Ds: ds,
@@ -94,7 +98,7 @@ func New() (*App, error) {
 		Student:         hdlStudent,
 		Teacher:         hdlTeacher,
 		Pub:             pub,
-		User:            user,
+		User:            hdlUser,
 		Mid:             mid,
 		Curriculum:      hdlCurriculum,
 		Class:           hdlClass,
@@ -128,6 +132,6 @@ var webSet = wire.NewSet(wire.Struct(new(web.Web), "*"))
 
 var helSet = wire.NewSet(wire.Struct(new(hdl.Hdl), "*"), wire.Struct(new(hdl.Student), "*"), wire.Struct(new(hdl.Pub), "*"), wire.Struct(new(hdl.Teacher), "*"), wire.Struct(new(hdl.User), "*"), wire.Struct(new(hdl.Mid), "*"), wire.Struct(new(hdl.Curriculum), "*"), wire.Struct(new(hdl.Class), "*"), wire.Struct(new(hdl.SchoolYear), "*"), wire.Struct(new(hdl.ClassCurriculum), "*"), wire.Struct(new(hdl.Examination), "*"), wire.Struct(new(hdl.Achievement), "*"))
 
-var srvSet = wire.NewSet(wire.Struct(new(service.Teacher), "*"), wire.Struct(new(service.Curriculum), "*"), wire.Struct(new(service.Class), "*"), wire.Struct(new(service.Student), "*"), wire.Struct(new(service.SchoolYear), "*"), wire.Struct(new(service.ClassCurriculum), "*"), wire.Struct(new(service.Examination), "*"), wire.Struct(new(service.Achievement), "*"))
+var srvSet = wire.NewSet(wire.Struct(new(service.Teacher), "*"), wire.Struct(new(service.Curriculum), "*"), wire.Struct(new(service.Class), "*"), wire.Struct(new(service.Student), "*"), wire.Struct(new(service.SchoolYear), "*"), wire.Struct(new(service.ClassCurriculum), "*"), wire.Struct(new(service.Examination), "*"), wire.Struct(new(service.Achievement), "*"), wire.Struct(new(service.User), "*"))
 
 var daoSet = wire.NewSet(wire.Struct(new(dao.Class), "*"), wire.Struct(new(dao.Curriculum), "*"), wire.Struct(new(dao.ClassCurriculum), "*"))

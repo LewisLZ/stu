@@ -55,6 +55,7 @@ var srvSet = wire.NewSet(
 	wire.Struct(new(service.ClassCurriculum), "*"),
 	wire.Struct(new(service.Examination), "*"),
 	wire.Struct(new(service.Achievement), "*"),
+	wire.Struct(new(service.User), "*"),
 )
 
 var daoSet = wire.NewSet(
