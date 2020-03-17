@@ -16,7 +16,7 @@ const (
 type Teacher struct {
 	Base
 	Name   string `gorm:"not null;size:10" json:"name,omitempty"`
-	Sex    Sex    `gorm:"not null" json:"sex,omitempty"` // 性别 1:男，2:女
+	Sex    Sex    `gorm:"not null;size:1" json:"sex,omitempty"` // 性别 1:男，2:女
 	Mobile string `gorm:"not null;size:11" json:"mobile,omitempty"`
 
 	Class         []*Class      `gorm:"-" json:"class"`
